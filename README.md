@@ -11,11 +11,13 @@ A simple, offline-first Urdu app for recording and calculating electricity meter
 - White/black/red theme matching the app icon.
 - Automated tests for every case listed in the spec (`test/unit_calculation_test.dart`).
 
+**Also working now:**
+- **PDF export** (`lib/services/export_service.dart`) — builds a proper Urdu RTL table (date / start / end / total + monthly total), using the bundled Noto Nastaliq Urdu font (`assets/fonts/NotoNastaliqUrdu.ttf`). Shares through the OS print/share sheet — fully offline.
+- **Image export** (`lib/widgets/monthly_report_image_widget.dart`) — renders the same report as a styled PNG (white/black/red theme) and shares it via `share_plus`, ready for WhatsApp.
+- App icon — the one you provided is saved at `assets/icon/app_icon.png`; architecture supports swapping it freely.
+
 **Stubbed, needs a real device to build out:**
-- `lib/services/ocr_service.dart` — camera capture + on-device ML Kit OCR. Interface and Urdu messages are defined; the actual camera preview/capture UI needs a device/emulator to build and tune.
-- PDF export (`pdf` + `printing` packages) — needs an Urdu-shaping font (e.g. Noto Nastaliq Urdu) bundled in `assets/fonts/`.
-- Image export for WhatsApp sharing (`screenshot` + `share_plus`).
-- App icon — architecture supports swapping `assets/icon/` freely; the icon in this repo is the one you provided.
+- `lib/services/ocr_service.dart` — camera capture + on-device ML Kit OCR. Interface and Urdu messages (`میٹر نمبر دوبارہ چیک کریں`, `تصویر لینے میں مسئلہ پیش آیا`) are defined; the camera preview/capture UI genuinely needs a device/emulator to build and tune, so it's left as a clean `TODO` rather than untested guesswork.
 
 ## Getting this running locally
 

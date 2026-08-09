@@ -1,14 +1,19 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 import '../db/database_helper.dart';
 import '../models/unit_record.dart';
+import '../services/export_service.dart';
 import '../theme.dart';
 import '../utils/urdu_format.dart';
+import '../widgets/monthly_report_image_widget.dart';
 
 /// Book-like monthly records browser — swipe left/right between months.
-/// PDF/image export are wired as entry points here (export generation
-/// itself lives in export_service.dart, built out separately since it
-/// needs Urdu font assets bundled and tested on-device for correct RTL
-/// shaping in the PDF).
+/// PDF export goes through export_service.dart (Urdu-shaping font bundled
+/// in assets/fonts/). Image export renders monthly_report_image_widget.dart
+/// off-screen and shares it as a PNG — good for WhatsApp.
 class MonthlyRecordsScreen extends StatefulWidget {
   final String userName;
   const MonthlyRecordsScreen({super.key, required this.userName});
@@ -64,11 +69,70 @@ class _MonthlyRecordsScreenState extends State<MonthlyRecordsScreen> {
   }
 }
 
-class _MonthPage extends StatelessWidget {
+class _MonthPage extends StatefulWidget {
   final int year;
   final int month;
   final String userName;
   const _MonthPage({required this.year, required this.month, required this.userName});
+
+  @override
+  State<_MonthPage> createState() => _MonthPageState();
+}
+
+class _MonthPageState extends State<_MonthPage> {
+  final ScreenshotController _screenshotController = ScreenshotController();
+  bool _exporting = false;
+
+  int get year => widget.year;
+  int get month => widget.month;
+  String get userName => widget.userName;
+
+  void _showSnack(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg, textAlign: TextAlign.right)));
+  }
+
+  Future<void> _exportPdf(List<UnitRecord> records) async {
+    if (records.isEmpty) {
+      _showSnack('اس مہینے کوئی ریکارڈ موجود نہیں');
+      return;
+    }
+    setState(() => _exporting = true);
+    try {
+      await ExportService.shareMonthlyReport(
+        userName: userName,
+        year: year,
+        month: month,
+        records: records,
+      );
+    } catch (_) {
+      _showSnack('PDF بنانے میں مسئلہ پیش آیا');
+    } finally {
+      if (mounted) setState(() => _exporting = false);
+    }
+  }
+
+  Future<void> _exportImage(List<UnitRecord> records) async {
+    if (records.isEmpty) {
+      _showSnack('اس مہینے کوئی ریکارڈ موجود نہیں');
+      return;
+    }
+    setState(() => _exporting = true);
+    try {
+      final bytes = await _screenshotController.captureFromWidget(
+        MonthlyReportImageWidget(userName: userName, year: year, month: month, records: records),
+        pixelRatio: 2.5,
+      );
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/unit-saathi-${UrduFormat.monthName(month)}-$year.png');
+      await file.writeAsBytes(bytes);
+      await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
+    } catch (_) {
+      _showSnack('تصویر بنانے میں مسئلہ پیش آیا');
+    } finally {
+      if (mounted) setState(() => _exporting = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,11 +157,7 @@ class _MonthPage extends StatelessWidget {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('PDF بنائیں — جلد شامل کیا جائے گا')),
-                      );
-                    },
+                    onPressed: _exporting ? null : () => _exportPdf(records),
                     icon: const Icon(Icons.picture_as_pdf_outlined),
                     label: const Text('PDF بنائیں'),
                   ),
@@ -105,16 +165,16 @@ class _MonthPage extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('تصویر بنائیں — جلد شامل کیا جائے گا')),
-                      );
-                    },
+                    onPressed: _exporting ? null : () => _exportImage(records),
                     icon: const Icon(Icons.image_outlined),
                     label: const Text('تصویر بنائیں'),
                   ),
                 ),
               ],
+            ),
+            if (_exporting) const Padding(
+              padding: EdgeInsets.only(top: 10),
+              child: Center(child: CircularProgressIndicator(color: AppColors.red)),
             ),
             const SizedBox(height: 16),
             if (records.isEmpty)
