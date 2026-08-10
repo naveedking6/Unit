@@ -61,16 +61,16 @@ jobs:
 
           cat >> android/build.gradle << 'EOF'
 
-// Force every Android library module (plugins included) to compile against
-// the same SDK/NDK, since some plugins' own build.gradle files pin an older
-// version via flutter.compileSdkVersion than this app's dependencies need.
-gradle.afterProject { proj ->
-    if (proj.plugins.hasPlugin("com.android.library")) {
-        proj.android.compileSdk = 35
-        proj.android.ndkVersion = "25.1.8937393"
-    }
-}
-EOF
+          // Force every Android library module (plugins included) to compile against
+          // the same SDK/NDK, since some plugins' own build.gradle files pin an older
+          // version via flutter.compileSdkVersion than this app's dependencies need.
+          gradle.afterProject { proj ->
+              if (proj.plugins.hasPlugin("com.android.library")) {
+                  proj.android.compileSdk = 35
+                  proj.android.ndkVersion = "25.1.8937393"
+              }
+          }
+          EOF
 
           echo "--- app/build.gradle android block ---"
           grep -n "compileSdk\|ndkVersion\|minifyEnabled\|signingConfig" android/app/build.gradle
@@ -113,3 +113,5 @@ EOF
         with:
           name: unit-saathi-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 30
