@@ -126,7 +126,7 @@ class _MonthPageState extends State<_MonthPage> {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/unit-saathi-${UrduFormat.monthName(month)}-$year.png');
       await file.writeAsBytes(bytes);
-      await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
+      await Share.shareXFiles([XFile(file.path)]);
     } catch (_) {
       _showSnack('تصویر بنانے میں مسئلہ پیش آیا');
     } finally {
