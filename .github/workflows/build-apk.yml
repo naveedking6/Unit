@@ -46,17 +46,36 @@ jobs:
           echo "--- gradle-wrapper.properties ---"
           cat android/gradle/wrapper/gradle-wrapper.properties
 
-      # A couple of plugins (printing, ML-kit-adjacent transitive deps) need
-      # a newer compileSdk/NDK than Flutter 3.24's default template ships.
-      # Also disable R8 minification for now — safer than chasing keep-rules
-      # for every plugin's reflective classes while the app is still young.
-      - name: Bump compileSdk / NDK, disable minification
+      # A couple of plugins (printing, path_provider, share_plus, sqflite)
+      # need a newer compileSdk/NDK than Flutter 3.24's default template
+      # ships. Each plugin has its OWN build.gradle (from the pub cache)
+      # that independently reads flutter.compileSdkVersion/ndkVersion, so
+      # patching only android/app/build.gradle doesn't reach them — force
+      # it onto every Android library module via a root-level Gradle hook
+      # instead. Also disable R8 minification for now.
+      - name: Bump compileSdk / NDK for all modules, disable minification
         run: |
-          sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 35/' android/app/build.gradle
-          sed -i 's/ndkVersion flutter.ndkVersion/ndkVersion "25.1.8937393"/' android/app/build.gradle
+          sed -i -E 's/compileSdk(Version)?\s*=?\s*flutter\.compileSdkVersion/compileSdk = 35/' android/app/build.gradle
+          sed -i -E 's/ndkVersion\s*=?\s*flutter\.ndkVersion/ndkVersion = "25.1.8937393"/' android/app/build.gradle
           sed -i '/signingConfig signingConfigs.debug/a\            minifyEnabled false' android/app/build.gradle
+
+          cat >> android/build.gradle << 'EOF'
+
+// Force every Android library module (plugins included) to compile against
+// the same SDK/NDK, since some plugins' own build.gradle files pin an older
+// version via flutter.compileSdkVersion than this app's dependencies need.
+gradle.afterProject { proj ->
+    if (proj.plugins.hasPlugin("com.android.library")) {
+        proj.android.compileSdk = 35
+        proj.android.ndkVersion = "25.1.8937393"
+    }
+}
+EOF
+
           echo "--- app/build.gradle android block ---"
           grep -n "compileSdk\|ndkVersion\|minifyEnabled\|signingConfig" android/app/build.gradle
+          echo "--- root build.gradle tail ---"
+          tail -n 15 android/build.gradle
 
       - name: Install dependencies
         run: flutter pub get
