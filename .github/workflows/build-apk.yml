@@ -60,6 +60,10 @@ jobs:
       - name: Save build log for debugging
         if: always()
         run: |
+          echo "## Build log (last 200 lines)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -n 200 /tmp/build.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
           mkdir -p ci-logs
           cp /tmp/build.log ci-logs/last-build.log || echo "no log" > ci-logs/last-build.log
           git config user.name "ci-log-bot"
@@ -67,7 +71,7 @@ jobs:
           git checkout -B ci-debug
           git add ci-logs/last-build.log
           git commit -m "ci: update build log [skip ci]" || echo "nothing to commit"
-          git push -f origin ci-debug || echo "log push failed, continuing"
+          git push -f origin ci-debug 2>&1 || echo "LOG_PUSH_FAILED"
 
       - name: Fail job if build failed
         if: steps.build_apk.outcome == 'failure'
