@@ -64,9 +64,10 @@ jobs:
           cp /tmp/build.log ci-logs/last-build.log || echo "no log" > ci-logs/last-build.log
           git config user.name "ci-log-bot"
           git config user.email "ci-log-bot@users.noreply.github.com"
+          git checkout -B ci-debug
           git add ci-logs/last-build.log
           git commit -m "ci: update build log [skip ci]" || echo "nothing to commit"
-          git push origin HEAD:main || echo "log push failed, continuing"
+          git push -f origin ci-debug || echo "log push failed, continuing"
 
       - name: Fail job if build failed
         if: steps.build_apk.outcome == 'failure'
