@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -51,7 +53,24 @@ jobs:
         run: flutter test
 
       - name: Build release APK
-        run: flutter build apk --release
+        id: build_apk
+        continue-on-error: true
+        run: flutter build apk --release 2>&1 | tee /tmp/build.log
+
+      - name: Save build log for debugging
+        if: always()
+        run: |
+          mkdir -p ci-logs
+          cp /tmp/build.log ci-logs/last-build.log || echo "no log" > ci-logs/last-build.log
+          git config user.name "ci-log-bot"
+          git config user.email "ci-log-bot@users.noreply.github.com"
+          git add ci-logs/last-build.log
+          git commit -m "ci: update build log [skip ci]" || echo "nothing to commit"
+          git push origin HEAD:main || echo "log push failed, continuing"
+
+      - name: Fail job if build failed
+        if: steps.build_apk.outcome == 'failure'
+        run: exit 1
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
