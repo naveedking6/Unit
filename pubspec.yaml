@@ -28,9 +28,15 @@ dependencies:
   # google_mlkit_text_recognition: ^0.13.0
   # image: ^4.2.0
 
-  # PDF export (Urdu RTL support via a Nastaliq/Naskh font)
+  # PDF generation (pure Dart, no native Android code — safe)
   pdf: ^3.11.1
-  printing: ^5.13.1
+  # NOTE: `printing` package removed — its Android module hardcodes an old
+  # compileSdk that doesn't include android:attr/lStar, breaking the release
+  # build (AAPT resource-linking error), and attempts to force a newer SDK
+  # onto it via Gradle hooks didn't take effect on this Flutter version.
+  # PDF sharing now goes through path_provider + share_plus instead (same
+  # pattern already used for image export below).
+  # printing: ^5.13.1
 
   # Image export for WhatsApp sharing
   screenshot: ^3.0.0

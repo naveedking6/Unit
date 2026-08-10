@@ -1,13 +1,16 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/unit_record.dart';
 import '../utils/urdu_format.dart';
 
-/// Builds and shares/prints a one-month PDF report. Runs entirely offline —
-/// `printing`'s share sheet uses the OS share/print dialog, no network call.
+/// Builds and shares a one-month PDF report. Fully offline — the PDF bytes
+/// are generated locally and handed to the OS share sheet via share_plus
+/// (writing to a temp file first), same pattern as image export.
 class ExportService {
   static pw.Font? _urduFont;
   static pw.Font? _urduFontBold;
@@ -117,8 +120,9 @@ class ExportService {
     );
   }
 
-  /// Shows the OS print/share sheet for the given month — user can save,
-  /// print, or share as a PDF file.
+  /// Shares the given month's PDF report via the OS share sheet — user can
+  /// save, print (their share sheet will usually offer a printer target),
+  /// or send it directly (e.g. WhatsApp).
   static Future<void> shareMonthlyReport({
     required String userName,
     required int year,
@@ -131,9 +135,9 @@ class ExportService {
       month: month,
       records: records,
     );
-    await Printing.sharePdf(
-      bytes: bytes,
-      filename: 'unit-saathi-${UrduFormat.monthName(month)}-$year.pdf',
-    );
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/unit-saathi-${UrduFormat.monthName(month)}-$year.pdf');
+    await file.writeAsBytes(bytes);
+    await Share.shareXFiles([XFile(file.path)]);
   }
 }
