@@ -1,6 +1,12 @@
 /// Offline meter-reading capture via the device camera + on-device OCR
 /// (Google ML Kit text recognition — runs fully offline, no network call).
 ///
+/// NOTE: the `camera` and `google_mlkit_text_recognition` packages are
+/// currently commented out in pubspec.yaml — they were pulling in Android
+/// SDK requirements that broke the release build (R8 stripped classes for
+/// ML Kit's optional per-language recognizers) for a feature nothing calls
+/// yet. Uncomment them there when picking this up.
+///
 /// This is left as a clean interface so the camera/ML Kit wiring can be
 /// completed against a real device (camera preview + capture UI can't be
 /// meaningfully built/tested outside a Flutter/Android environment).

@@ -17,7 +17,7 @@ A simple, offline-first Urdu app for recording and calculating electricity meter
 - App icon — the one you provided is saved at `assets/icon/app_icon.png`; architecture supports swapping it freely.
 
 **Stubbed, needs a real device to build out:**
-- `lib/services/ocr_service.dart` — camera capture + on-device ML Kit OCR. Interface and Urdu messages (`میٹر نمبر دوبارہ چیک کریں`, `تصویر لینے میں مسئلہ پیش آیا`) are defined; the camera preview/capture UI genuinely needs a device/emulator to build and tune, so it's left as a clean `TODO` rather than untested guesswork.
+- `lib/services/ocr_service.dart` — camera capture + on-device ML Kit OCR. Interface and Urdu messages (`میٹر نمبر دوبارہ چیک کریں`, `تصویر لینے میں مسئلہ پیش آیا`) are defined; the camera preview/capture UI genuinely needs a device/emulator to build and tune, so it's left as a clean `TODO` rather than untested guesswork. The `camera` and `google_mlkit_text_recognition` packages are currently commented out in `pubspec.yaml` — they were breaking the Android release build (R8 stripping ML Kit's language-recognizer classes) for a feature nothing calls yet. Uncomment them when this gets built out.
 
 ## Getting this running locally
 

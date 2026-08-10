@@ -19,10 +19,14 @@ dependencies:
   # State management (simple, low overhead for low-end phones)
   provider: ^6.1.2
 
-  # Camera + OCR (offline, on-device via Google ML Kit text recognition)
-  camera: ^0.10.6
-  google_mlkit_text_recognition: ^0.13.0
-  image: ^4.2.0
+  # Camera + OCR (offline, on-device via Google ML Kit text recognition) —
+  # re-add once the camera capture flow is actually implemented and wired
+  # up (see lib/services/ocr_service.dart). Not imported anywhere yet, and
+  # pulling them in was breaking the release build (R8 missing-class errors
+  # from ML Kit's optional per-language recognizers) for no current benefit.
+  # camera: ^0.10.6
+  # google_mlkit_text_recognition: ^0.13.0
+  # image: ^4.2.0
 
   # PDF export (Urdu RTL support via a Nastaliq/Naskh font)
   pdf: ^3.11.1

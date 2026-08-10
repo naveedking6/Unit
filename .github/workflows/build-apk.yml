@@ -46,6 +46,18 @@ jobs:
           echo "--- gradle-wrapper.properties ---"
           cat android/gradle/wrapper/gradle-wrapper.properties
 
+      # A couple of plugins (printing, ML-kit-adjacent transitive deps) need
+      # a newer compileSdk/NDK than Flutter 3.24's default template ships.
+      # Also disable R8 minification for now — safer than chasing keep-rules
+      # for every plugin's reflective classes while the app is still young.
+      - name: Bump compileSdk / NDK, disable minification
+        run: |
+          sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 35/' android/app/build.gradle
+          sed -i 's/ndkVersion flutter.ndkVersion/ndkVersion "25.1.8937393"/' android/app/build.gradle
+          sed -i '/signingConfig signingConfigs.debug/a\            minifyEnabled false' android/app/build.gradle
+          echo "--- app/build.gradle android block ---"
+          grep -n "compileSdk\|ndkVersion\|minifyEnabled\|signingConfig" android/app/build.gradle
+
       - name: Install dependencies
         run: flutter pub get
 
