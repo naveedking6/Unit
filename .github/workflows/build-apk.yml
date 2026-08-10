@@ -13,6 +13,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.24.0'
           channel: 'stable'
 
       # This project doesn't have android/ios folders committed yet
@@ -23,6 +24,20 @@ jobs:
           if [ ! -d "android" ]; then
             flutter create --platforms=android --org com.unitsaathi .
           fi
+
+      # Flutter 3.24's default template pins an older Kotlin Gradle plugin
+      # than some of this app's dependencies need. Bump it directly rather
+      # than changing the Flutter SDK version (which affects the theming
+      # API compiled against).
+      - name: Bump Kotlin Gradle plugin version
+        run: |
+          sed -i 's/id "org.jetbrains.kotlin.android" version "[0-9.]*"/id "org.jetbrains.kotlin.android" version "1.9.24"/' android/settings.gradle
+          sed -i 's/id "com.android.application" version "[0-9.]*"/id "com.android.application" version "8.3.0"/' android/settings.gradle
+          sed -i "s/distributionUrl=.*/distributionUrl=https\\\\:\/\/services.gradle.org\/distributions\/gradle-8.6-all.zip/" android/gradle/wrapper/gradle-wrapper.properties
+          echo "--- settings.gradle ---"
+          grep -n "version" android/settings.gradle
+          echo "--- gradle-wrapper.properties ---"
+          cat android/gradle/wrapper/gradle-wrapper.properties
 
       - name: Install dependencies
         run: flutter pub get
