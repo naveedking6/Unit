@@ -80,6 +80,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Generate app launcher icon from assets/icon/app_icon.png
+        run: dart run flutter_launcher_icons
+
       - name: Run tests
         run: flutter test
 

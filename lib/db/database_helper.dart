@@ -52,6 +52,10 @@ class DatabaseHelper {
     await db.insert('user_profile', {'name': name});
   }
 
+  /// Alias — called after saving a record with a possibly different name,
+  /// so the next entry defaults to whoever typed most recently.
+  Future<void> updateLastUsedName(String name) => saveName(name);
+
   Future<String?> getName() async {
     final db = await database;
     final rows = await db.query('user_profile', limit: 1);

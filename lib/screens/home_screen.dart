@@ -182,7 +182,14 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(UrduFormat.fullDate(r.date), style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(r.name, style: const TextStyle(color: AppColors.greyText, fontSize: 13)),
+                      const SizedBox(width: 8),
+                      Text(UrduFormat.fullDate(r.date), style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
                   const SizedBox(height: 4),
                   Text('${r.startUnit}  →  ${r.endUnit}', style: const TextStyle(color: AppColors.greyText)),
                 ],

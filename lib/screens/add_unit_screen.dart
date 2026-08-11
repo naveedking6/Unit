@@ -15,6 +15,7 @@ class AddUnitScreen extends StatefulWidget {
 }
 
 class _AddUnitScreenState extends State<AddUnitScreen> {
+  final _nameController = TextEditingController();
   final _startController = TextEditingController();
   final _endController = TextEditingController();
   String? _error;
@@ -24,8 +25,17 @@ class _AddUnitScreenState extends State<AddUnitScreen> {
   @override
   void initState() {
     super.initState();
+    _nameController.text = widget.userName;
     _startController.addListener(_recalculate);
     _endController.addListener(_recalculate);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _startController.dispose();
+    _endController.dispose();
+    super.dispose();
   }
 
   void _recalculate() {
@@ -64,19 +74,25 @@ class _AddUnitScreenState extends State<AddUnitScreen> {
   }
 
   Future<void> _save() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      setState(() => _error = 'نام درج کریں');
+      return;
+    }
     final start = int.tryParse(_startController.text);
     final end = int.tryParse(_endController.text);
     try {
       final total = UnitCalculator.calculateTotal(startUnit: start, endUnit: end);
       setState(() => _saving = true);
       final record = UnitRecord(
-        name: widget.userName,
+        name: name,
         date: DateTime.now(),
         startUnit: start!,
         endUnit: end!,
         createdAt: DateTime.now(),
       );
       await DatabaseHelper.instance.insertRecord(record);
+      await DatabaseHelper.instance.updateLastUsedName(name);
       if (!mounted) return;
       Navigator.of(context).pop(true);
       // Silence unused-total-var lint in some analyzers.
@@ -101,6 +117,25 @@ class _AddUnitScreenState extends State<AddUnitScreen> {
             children: [
               Text(today, style: const TextStyle(color: AppColors.greyText, fontSize: 15)),
               const SizedBox(height: 20),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      const Text('نام', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _nameController,
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(fontSize: 18),
+                        decoration: const InputDecoration(hintText: 'نام'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
               _unitField(
                 label: 'شروع کا یونٹ',
                 controller: _startController,
