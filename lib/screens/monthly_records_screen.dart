@@ -187,7 +187,7 @@ class _MonthPageState extends State<_MonthPage> {
             else
               ...records.map((r) => Card(
                     child: ListTile(
-                      title: Text(UrduFormat.fullDate(r.date)),
+                      title: Text('${r.name} — ${UrduFormat.fullDate(r.date)}'),
                       subtitle: Text('${r.startUnit}  →  ${r.endUnit}'),
                       trailing: Text(
                         '${r.totalUnit}',

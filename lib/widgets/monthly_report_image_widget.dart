@@ -51,7 +51,7 @@ class MonthlyReportImageWidget extends StatelessWidget {
               decoration: BoxDecoration(border: Border.all(color: AppColors.grey, width: 2), borderRadius: BorderRadius.circular(12)),
               child: Column(
                 children: [
-                  for (final r in records) _row(UrduFormat.fullDate(r.date), r.startUnit, r.endUnit, r.totalUnit),
+                  for (final r in records) _row(r.name, UrduFormat.fullDate(r.date), r.startUnit, r.endUnit, r.totalUnit),
                 ],
               ),
             ),
@@ -73,14 +73,15 @@ class MonthlyReportImageWidget extends StatelessWidget {
     );
   }
 
-  Widget _row(String date, int start, int end, int total) {
+  Widget _row(String name, String date, int start, int end, int total) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.grey, width: 1))),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(flex: 3, child: Text(date, style: const TextStyle(fontSize: 13))),
+          Expanded(flex: 2, child: Text(name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold))),
+          Expanded(flex: 3, child: Text(date, textAlign: TextAlign.center, style: const TextStyle(fontSize: 13))),
           Expanded(flex: 2, child: Text('$start → $end', textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, color: AppColors.greyText))),
           Expanded(flex: 1, child: Text('$total', textAlign: TextAlign.left, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.red))),
         ],

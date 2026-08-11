@@ -64,11 +64,13 @@ class ExportService {
               1: pw.FlexColumnWidth(2),
               2: pw.FlexColumnWidth(2),
               3: pw.FlexColumnWidth(2),
+              4: pw.FlexColumnWidth(2),
             },
             children: [
               pw.TableRow(
                 decoration: pw.BoxDecoration(color: PdfColor.fromHex('#161616')),
                 children: [
+                  _cell('نام', header: true),
                   _cell('تاریخ', header: true),
                   _cell('شروع کا یونٹ', header: true),
                   _cell('آخری یونٹ', header: true),
@@ -78,6 +80,7 @@ class ExportService {
               for (final r in records)
                 pw.TableRow(
                   children: [
+                    _cell(r.name),
                     _cell(UrduFormat.fullDate(r.date)),
                     _cell('${r.startUnit}'),
                     _cell('${r.endUnit}'),
