@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'theme.dart';
 import 'screens/splash_screen.dart';
 
@@ -17,6 +18,11 @@ class UnitSaathiApp extends StatelessWidget {
       theme: AppTheme.theme,
       locale: const Locale('ur'),
       supportedLocales: const [Locale('ur'), Locale('en')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: const SplashScreen(),
     );
   }
