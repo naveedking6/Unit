@@ -4,9 +4,11 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/unit_record.dart';
 import '../utils/urdu_format.dart';
+import '../widgets/monthly_report_image_widget.dart';
 
 /// Builds and shares a one-month PDF report. Fully offline — the PDF bytes
 /// are generated locally and handed to the OS share sheet via share_plus
@@ -140,6 +142,24 @@ class ExportService {
     );
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/unit-saathi-${UrduFormat.monthName(month)}-$year.pdf');
+    await file.writeAsBytes(bytes);
+    await Share.shareXFiles([XFile(file.path)]);
+  }
+
+  /// Renders the month's report as a styled PNG (off-screen, no live widget
+  /// tree needed) and shares it — good for WhatsApp.
+  static Future<void> shareMonthlyReportImage({
+    required String userName,
+    required int year,
+    required int month,
+    required List<UnitRecord> records,
+  }) async {
+    final bytes = await ScreenshotController().captureFromWidget(
+      MonthlyReportImageWidget(userName: userName, year: year, month: month, records: records),
+      pixelRatio: 2.5,
+    );
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/unit-saathi-${UrduFormat.monthName(month)}-$year.png');
     await file.writeAsBytes(bytes);
     await Share.shareXFiles([XFile(file.path)]);
   }

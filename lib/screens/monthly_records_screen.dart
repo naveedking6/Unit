@@ -1,14 +1,9 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:screenshot/screenshot.dart';
-import 'package:share_plus/share_plus.dart';
 import '../db/database_helper.dart';
 import '../models/unit_record.dart';
 import '../services/export_service.dart';
 import '../theme.dart';
 import '../utils/urdu_format.dart';
-import '../widgets/monthly_report_image_widget.dart';
 
 /// Book-like monthly records browser — swipe left/right between months.
 /// PDF export goes through export_service.dart (Urdu-shaping font bundled
@@ -80,7 +75,6 @@ class _MonthPage extends StatefulWidget {
 }
 
 class _MonthPageState extends State<_MonthPage> {
-  final ScreenshotController _screenshotController = ScreenshotController();
   bool _exporting = false;
 
   int get year => widget.year;
@@ -119,14 +113,12 @@ class _MonthPageState extends State<_MonthPage> {
     }
     setState(() => _exporting = true);
     try {
-      final bytes = await _screenshotController.captureFromWidget(
-        MonthlyReportImageWidget(userName: userName, year: year, month: month, records: records),
-        pixelRatio: 2.5,
+      await ExportService.shareMonthlyReportImage(
+        userName: userName,
+        year: year,
+        month: month,
+        records: records,
       );
-      final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/unit-saathi-${UrduFormat.monthName(month)}-$year.png');
-      await file.writeAsBytes(bytes);
-      await Share.shareXFiles([XFile(file.path)]);
     } catch (_) {
       _showSnack('تصویر بنانے میں مسئلہ پیش آیا');
     } finally {
