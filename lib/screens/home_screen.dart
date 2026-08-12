@@ -414,36 +414,38 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _actionRow() {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: _exporting ? null : _exportImage,
-            icon: const Icon(Icons.share_outlined, size: 18),
-            label: const Text('تصویر بنائیں'),
-          ),
+        ElevatedButton.icon(
+          onPressed: () async {
+            final saved = await Navigator.of(context).push<bool>(
+              MaterialPageRoute(builder: (_) => AddUnitScreen(userName: _currentName)),
+            );
+            if (saved == true) _load();
+          },
+          icon: const Icon(Icons.add),
+          label: const Text('نیا یونٹ شامل کریں'),
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: _exporting ? null : _exportPdf,
-            icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
-            label: const Text('PDF بنائیں'),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          flex: 2,
-          child: ElevatedButton.icon(
-            onPressed: () async {
-              final saved = await Navigator.of(context).push<bool>(
-                MaterialPageRoute(builder: (_) => AddUnitScreen(userName: _currentName)),
-              );
-              if (saved == true) _load();
-            },
-            icon: const Icon(Icons.add),
-            label: const Text('نیا یونٹ شامل کریں'),
-          ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _exporting ? null : _exportImage,
+                icon: const Icon(Icons.share_outlined, size: 18),
+                label: const Text('تصویر بنائیں'),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _exporting ? null : _exportPdf,
+                icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                label: const Text('PDF بنائیں'),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -455,11 +457,11 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _navItem(Icons.calculate_outlined, 'کیلکولیٹر', () => _openScreen(const CalculatorScreen())),
-          _navItem(Icons.ios_share_outlined, 'برآمد کریں', () => _openScreen(MonthlyRecordsScreen(userName: _currentName))),
-          _navItem(Icons.home_rounded, 'ہوم', () {}, active: true),
-          _navItem(Icons.receipt_long_outlined, 'ریکارڈز', () => _openScreen(MonthlyRecordsScreen(userName: _currentName))),
           _navItem(Icons.calendar_month_outlined, 'کیلنڈر', () => _openScreen(MonthlyRecordsScreen(userName: _currentName))),
+          _navItem(Icons.receipt_long_outlined, 'ریکارڈز', () => _openScreen(MonthlyRecordsScreen(userName: _currentName))),
+          _navItem(Icons.home_rounded, 'ہوم', () {}, active: true),
+          _navItem(Icons.ios_share_outlined, 'برآمد کریں', () => _openScreen(MonthlyRecordsScreen(userName: _currentName))),
+          _navItem(Icons.calculate_outlined, 'کیلکولیٹر', () => _openScreen(const CalculatorScreen())),
         ],
       ),
     );
